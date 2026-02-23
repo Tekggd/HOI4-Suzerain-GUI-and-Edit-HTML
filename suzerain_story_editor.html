@@ -123,47 +123,48 @@
 </head>
 <body>
 <header>
-  <div class="logo">SUZERAIN <span>剧情编辑器 v2</span></div>
+  <div class="logo">SUZERAIN <span id="logoSub">剧情编辑器 v2</span></div>
   <div style="width:1px;height:20px;background:var(--border)"></div>
   <div style="display:flex;gap:6px;align-items:center;">
-    <span style="font-size:11px;color:var(--text-dim)">剧情：</span>
+    <span id="lblStory" style="font-size:11px;color:var(--text-dim)">剧情：</span>
     <select id="storySel" class="input-inline" style="width:160px"></select>
-    <button class="btn sm" onclick="newStory()">＋ 新建</button>
-    <button class="btn sm danger" onclick="deleteStory()">删除</button>
+    <button class="btn sm" id="btnNewStory" onclick="newStory()">＋ 新建</button>
+    <button class="btn sm danger" id="btnDelStory" onclick="deleteStory()">删除</button>
   </div>
   <div class="header-actions">
-    <button class="btn sm" onclick="autoLayout()">自动排版</button>
-    <button class="btn sm" onclick="showPreview()">预览</button>
-    <button class="btn primary sm" onclick="showExport()">导出代码</button>
+    <button class="btn sm" id="langBtn" onclick="toggleLang()" style="font-family:'Share Tech Mono',monospace;letter-spacing:1px;min-width:36px">EN</button>
+    <button class="btn sm" id="btnAutoLayout" onclick="autoLayout()">自动排版</button>
+    <button class="btn sm" id="btnPreview" onclick="showPreview()">预览</button>
+    <button class="btn primary sm" id="btnExport" onclick="showExport()">导出代码</button>
   </div>
 </header>
 
 <div class="main">
   <div class="left-panel">
     <div class="panel-section">
-      <div class="section-title">角色管理</div>
+      <div class="section-title" id="secChars">角色管理</div>
       <div id="charList" class="char-list"></div>
       <div style="display:flex;gap:4px;margin-top:6px;">
-        <input id="newCharName" class="input-inline" placeholder="角色名" style="flex:1;min-width:0">
+        <input id="newCharName" class="input-inline" placeholder="角色名" style="flex:1;min-width:0" data-i18n-ph="charNamePh">
         <button class="btn sm" onclick="addChar()">＋</button>
       </div>
-      <div class="hint" style="margin-top:4px">ID从10000起自动分配</div>
+      <div class="hint" id="hintCharId" style="margin-top:4px">ID从10000起自动分配</div>
     </div>
-    <div style="padding:8px 10px 4px;font-size:10px;color:var(--gold-dim);letter-spacing:2px;text-transform:uppercase;flex-shrink:0;">剧情列表</div>
+    <div id="secStories" style="padding:8px 10px 4px;font-size:10px;color:var(--gold-dim);letter-spacing:2px;text-transform:uppercase;flex-shrink:0;">剧情列表</div>
     <div id="storyList" class="story-list"></div>
   </div>
 
   <div class="canvas-area">
     <div class="canvas-toolbar">
-      <button class="add-node-btn" onclick="addNode()">＋ 添加节点</button>
-      <div style="margin-left:auto;font-size:10px;color:var(--text-dim)">拖动标题栏移动 · 点击节点体选中编辑</div>
+      <button class="add-node-btn" id="btnAddNode" onclick="addNode()">＋ 添加节点</button>
+      <div id="canvasHint" style="margin-left:auto;font-size:10px;color:var(--text-dim)">拖动标题栏移动 · 点击节点体选中编辑</div>
     </div>
     <div class="canvas-scroll" id="canvasScroll">
       <div id="nodeCanvas">
         <svg id="connections"></svg>
         <div id="emptyState" class="empty-state">
           <div style="font-size:36px;opacity:.3">📜</div>
-          <div>选择或新建剧情，然后添加节点</div>
+          <div id="emptyText">选择或新建剧情，然后添加节点</div>
         </div>
       </div>
     </div>
@@ -171,7 +172,7 @@
 
   <div class="right-panel">
     <div class="inspector-header">
-      <span style="font-size:11px;color:var(--gold-dim);letter-spacing:1px">属性编辑</span>
+      <span id="inspTitle" style="font-size:11px;color:var(--gold-dim);letter-spacing:1px">属性编辑</span>
       <span id="nodeIdBadge" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);margin-left:auto"></span>
     </div>
     <div class="inspector-body" id="inspBody">
@@ -184,20 +185,20 @@
 <div class="modal-overlay" id="exportModal">
   <div class="modal">
     <div class="modal-header">
-      <span style="font-family:'Noto Serif SC',serif;color:var(--gold)">导出 HOI4 脚本</span>
-      <button class="btn sm" style="margin-left:auto" onclick="closeModal('exportModal')">关闭</button>
+      <span id="exportTitle" style="font-family:'Noto Serif SC',serif;color:var(--gold)">导出 HOI4 脚本</span>
+      <button class="btn sm" id="btnCloseExport" style="margin-left:auto" onclick="closeModal('exportModal')">关闭</button>
     </div>
     <div class="modal-body">
       <div class="tab-bar" style="margin-bottom:12px">
         <div class="tab active" id="et1" onclick="switchET('eff')">Effects (.txt)</div>
-        <div class="tab" id="et2" onclick="switchET('loc')">本地化 (.yml)</div>
+        <div class="tab" id="et2" onclick="switchET('loc')" data-i18n="locTab">本地化 (.yml)</div>
       </div>
       <div id="effDiv"><pre class="code-block" id="effCode"></pre></div>
       <div id="locDiv" style="display:none"><pre class="code-block" id="locCode"></pre></div>
     </div>
     <div class="modal-footer">
-      <button class="btn" onclick="copyExp()">复制</button>
-      <button class="btn primary" onclick="dlExp()">下载</button>
+      <button class="btn" id="btnCopy" onclick="copyExp()">复制</button>
+      <button class="btn primary" id="btnDl" onclick="dlExp()">下载</button>
     </div>
   </div>
 </div>
@@ -206,8 +207,8 @@
 <div class="modal-overlay" id="previewModal">
   <div class="modal">
     <div class="modal-header">
-      <span style="font-family:'Noto Serif SC',serif;color:var(--gold)">对话预览</span>
-      <button class="btn sm" style="margin-left:auto" onclick="closeModal('previewModal')">关闭</button>
+      <span id="previewTitle" style="font-family:'Noto Serif SC',serif;color:var(--gold)">对话预览</span>
+      <button class="btn sm" id="btnClosePreview" style="margin-left:auto" onclick="closeModal('previewModal')">关闭</button>
     </div>
     <div class="modal-body"><div id="prevContent" class="preview-chat"></div></div>
   </div>
@@ -248,7 +249,7 @@ function cname(id){const c=cb(id);return c?c.name:`ID:${id}`;}
 function ccolor(id){const c=cb(id);return c?c.color:'var(--text-dim)';}
 const COLS=['#c9a84c','#4a8a50','#b84040','#406080','#8060a0','#40a060','#a06040','#6080a0'];
 function charOpts(sel=''){
-  return '<option value="">— 无 —</option>'+
+  return `<option value="">${T('none')}</option>`+
     S.chars.map(c=>`<option value="${c.id}"${c.id==sel?' selected':''}>${c.name} (${c.id})</option>`).join('');
 }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -257,7 +258,7 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 // INIT
 // ================================================================
 function init(){
-  load(); renderChars(); renderStories(); renderStorySel();
+  load(); applyI18n(); renderChars(); renderStories(); renderStorySel();
   if(S.stories.length) selectStory(S.stories[0].id);
 }
 
@@ -276,14 +277,14 @@ function renderChars(){
       <div class="char-dot" style="background:${c.color}"></div>
       <span style="font-size:12px">${c.name}</span>
       <span class="char-id-badge">${c.id}</span>
-      <button class="xbtn" style="margin-left:4px;width:16px;height:16px;font-size:10px" onclick="delChar(${c.id})" title="删除角色">✕</button>
+      <button class="xbtn" style="margin-left:4px;width:16px;height:16px;font-size:10px" onclick="delChar(${c.id})" title="${T('delCharTitle')}">✕</button>
     </div>`
   ).join('');
 }
 function delChar(id){
   const c=S.chars.find(c=>c.id===id);
   if(!c)return;
-  if(!confirm(`删除角色「${c.name}」？\n注意：已引用该角色的节点不会自动清空。`))return;
+  if(!confirm(T('confirmDelChar')(c.name)))return;
   S.chars=S.chars.filter(c=>c.id!==id);
   save();renderChars();if(S.curN)renderInspector();
 }
@@ -292,14 +293,14 @@ function delChar(id){
 // STORIES
 // ================================================================
 function newStory(){
-  const name=prompt('剧情名称：');if(!name)return;
-  const key=prompt('token key（字母_数字，如 kmd_c1）：');if(!key)return;
+  const name=prompt(T('storyNamePrompt'));if(!name)return;
+  const key=prompt(T('tokenKeyPrompt'));if(!key)return;
   const s={id:S.nextS++,tokenKey:key.replace(/[^a-z0-9_]/gi,'_'),displayName:name,song:'',nodes:[],nextN:1};
   S.stories.push(s);save();renderStories();renderStorySel();selectStory(s.id);
 }
 function deleteStory(){
   const st=cs();if(!st)return;
-  if(!confirm(`删除「${st.displayName}」？`))return;
+  if(!confirm(T('confirmDelStory')(st.displayName)))return;
   S.stories=S.stories.filter(s=>s.id!==S.curS);S.curS=null;S.curN=null;
   save();renderStories();renderStorySel();renderCanvas();renderInspector();
 }
@@ -310,17 +311,17 @@ function selectStory(id){
 }
 function renderStories(){
   const el=document.getElementById('storyList');
-  if(!S.stories.length){el.innerHTML='<div style="color:var(--text-dim);font-size:11px;padding:8px">暂无剧情</div>';return;}
+  if(!S.stories.length){el.innerHTML=`<div style="color:var(--text-dim);font-size:11px;padding:8px">${T('noStories')}</div>`;return;}
   el.innerHTML=S.stories.map(s=>`
     <div class="story-item${s.id===S.curS?' active':''}" onclick="selectStory(${s.id})">
       <div style="font-weight:500">${s.displayName}</div>
       <div style="font-size:10px;color:var(--text-dim);font-family:'Share Tech Mono',monospace">${s.tokenKey}</div>
-      <div style="font-size:10px;color:var(--text-dim)">${s.nodes.length} 节点</div>
+      <div style="font-size:10px;color:var(--text-dim)">${T('nodeCount')(s.nodes.length)}</div>
     </div>`).join('');
 }
 function renderStorySel(){
   const sel=document.getElementById('storySel');
-  sel.innerHTML='<option value="">— 选择剧情 —</option>'+
+  sel.innerHTML=`<option value="">${T('selectStory')}</option>`+
     S.stories.map(s=>`<option value="${s.id}">${s.displayName} (${s.tokenKey})</option>`).join('');
   if(S.curS)sel.value=S.curS;
   sel.onchange=()=>{if(sel.value)selectStory(parseInt(sel.value));};
@@ -330,7 +331,7 @@ function renderStorySel(){
 // NODES
 // ================================================================
 function addNode(){
-  const st=cs();if(!st){alert('请先选择剧情');return;}
+  const st=cs();if(!st){alert(T('selectStoryFirst'));return;}
   const used=st.nodes.map(n=>n.msgNum);
   let num=1;while(used.includes(num))num++;
   const node={id:st.nextN++,msgNum:num,text:'',speaker:'',nameOnFirst:false,
@@ -374,7 +375,7 @@ function renderNodeEl(node){
   if(node.isEnd)tags.push(`<span class="node-tag tag-E">END</span>`);
   if(node.isTransfer)tags.push(`<span class="node-tag tag-T">T×${node.transferBranches.length}</span>`);
   if(node.options.length)tags.push(`<span class="node-tag tag-O">OPT×${node.options.length}</span>`);
-  if(!tags.length)tags.push(`<span class="node-tag tag-D">台词</span>`);
+  if(!tags.length)tags.push(`<span class="node-tag tag-D">${T('dialogueLabel')}</span>`);
   let sub='';
   if(node.options.length)
     sub+=`<div class="node-sub">`+node.options.map(o=>`<div style="color:var(--green-bright);font-size:10px;padding:1px 0">▶ [${o.optNum||'?'}] ${esc((o.text||'...').slice(0,22))}</div>`).join('')+'</div>';
@@ -383,17 +384,17 @@ function renderNodeEl(node){
   const html=`
     <div class="node-header" onmousedown="startDrag(event,${node.id})">
       <span class="node-num">#${node.msgNum}</span>
-      ${sp?`<span style="color:${sc};font-size:11px;font-weight:600">${sp.name}</span>`:'<span style="color:var(--text-dim);font-size:10px">旁白</span>'}
+      ${sp?`<span style="color:${sc};font-size:11px;font-weight:600">${sp.name}</span>`:`<span style="color:var(--text-dim);font-size:10px">${T('nodeNarrator')}</span>`}
       <div style="margin-left:auto;display:flex;gap:2px;flex-wrap:wrap;justify-content:flex-end">${tags.join('')}</div>
     </div>
     <div class="node-body" onclick="selectNode(${node.id})">
       ${sp?`<div class="node-speaker" style="color:${sc}">${sp.name}${node.nameOnFirst?' <span style="font-size:9px;color:var(--gold-dim)">[NAME]</span>':''}</div>`:''}
-      <div class="node-text">${esc(node.text)||'<span style="color:var(--text-dim);font-style:italic">（空台词）</span>'}</div>
+      <div class="node-text">${esc(node.text)||`<span style="color:var(--text-dim);font-style:italic">${T('nodeEmpty')}</span>`}</div>
     </div>
     ${sub}
     <div class="node-actions">
-      <button class="node-action" onclick="selectNode(${node.id})">编辑</button>
-      <button class="node-action del" onclick="deleteNode(${node.id})">删除</button>
+      <button class="node-action" onclick="selectNode(${node.id})">${T('nodeEdit')}</button>
+      <button class="node-action del" onclick="deleteNode(${node.id})">${T('nodeDelete')}</button>
     </div>`;
   if(!el){el=document.createElement('div');el.className='node';el.dataset.nid=node.id;canvas.appendChild(el);}
   el.innerHTML=html;el.style.left=node.x+'px';el.style.top=node.y+'px';
@@ -458,55 +459,49 @@ document.getElementById('canvasScroll').addEventListener('click',function(e){
 function renderInspector(){
   const node=cn();
   document.getElementById('nodeIdBadge').textContent=node?`#${node.msgNum}`:'';
-  if(!node){document.getElementById('inspBody').innerHTML='<div style="color:var(--text-dim);font-size:12px">请选择一个节点</div>';return;}
+  if(!node){document.getElementById('inspBody').innerHTML=`<div style="color:var(--text-dim);font-size:12px">${T('noNode')}</div>`;return;}
   document.getElementById('inspBody').innerHTML=buildInsp(node);
 }
 
 function buildInsp(n){
   return `
   <div class="field-group">
-    <div class="field-label">消息编号 (msgNum)</div>
+    <div class="field-label">${T('msgNumLabel')}</div>
     <input type="number" class="fi" value="${n.msgNum}" min="1" onchange="patch('msgNum',parseInt(this.value))">
-    <div class="hint">必须唯一；决定对话流程顺序</div>
+    <div class="hint">${T('msgNumHint')}</div>
   </div>
 
   <div class="field-group">
-    <div class="field-label">说话人</div>
+    <div class="field-label">${T('speakerLabel')}</div>
     <select class="fi" onchange="patch('speaker',this.value)">${charOpts(n.speaker)}</select>
   </div>
 
   <div class="field-group">
     <label class="checkbox-row">
       <input type="checkbox" ${n.nameOnFirst?'checked':''} onchange="patch('nameOnFirst',this.checked)">
-      <span>NAME标记（此节点触发角色名显示）</span>
+      <span>${T('nameMarkLabel')}</span>
     </label>
-    <div class="hint">勾选=在 name_setup/names_get 中注册此 msgNum</div>
+    <div class="hint">${T('nameMarkHint')}</div>
   </div>
 
   <div class="field-group">
-    <div class="field-label">台词内容</div>
-    <textarea class="fi" rows="4" placeholder="建议不超过38字" onchange="patch('text',this.value)">${esc(n.text)}</textarea>
+    <div class="field-label">${T('dialogueLabel')}</div>
+    <textarea class="fi" rows="4" placeholder="${T('dialoguePh')}" onchange="patch('text',this.value)">${esc(n.text)}</textarea>
   </div>
 
   <div class="divider"></div>
 
-  <!-- ===== PORTRAIT OPS ===== -->
   <div class="sub-panel">
     <div style="display:flex;align-items:center;gap:6px">
-      <span class="sub-title" style="color:var(--blue-bright)">🖼 肖像操作</span>
-      <button class="btn sm" style="margin-left:auto" onclick="addPop()">＋ 添加</button>
+      <span class="sub-title" style="color:var(--blue-bright)">${T('portraitTitle')}</span>
+      <button class="btn sm" style="margin-left:auto" onclick="addPop()">${T('addBtn')}</button>
     </div>
-    <div class="hint">
-      <b style="color:var(--blue-bright)">删旧+加新</b> = remove_first + add 新角色到末尾<br>
-      <b style="color:var(--gold)">补空槽</b> = add_first 9999（填补被删的槽位）<br>
-      <b style="color:var(--green-bright)">移到末尾</b> = move_last（将指定角色置于高亮末位）<br>
-      <b style="color:var(--red-bright)">清空全部</b> = clear_array portraits_local
-    </div>
+    <div class="hint">${T('portraitHint')}</div>
     <div id="popList">${buildPopsHTML(n)}</div>
     ${n.portraitOps.length?`
     <div class="field-group" style="margin-top:2px">
-      <div class="field-label" style="font-size:9px">肖像触发时附加音乐（可空）</div>
-      <input class="fi mono" style="font-size:11px" placeholder="曲名字符串" value="${esc(n.portraitSong||'')}"
+      <div class="field-label" style="font-size:9px">${T('portraitSongLabel')}</div>
+      <input class="fi mono" style="font-size:11px" placeholder="${T('portraitSongPh')}" value="${esc(n.portraitSong||'')}"
         onchange="patch('portraitSong',this.value)">
     </div>`:''}
   </div>
@@ -516,114 +511,106 @@ function buildInsp(n){
   <div class="field-group">
     <label class="checkbox-row">
       <input type="checkbox" ${n.isEnd?'checked':''} onchange="patch('isEnd',this.checked)">
-      <span style="color:var(--red-bright)">结束节点（END_msgs）</span>
+      <span style="color:var(--red-bright)">${T('endLabel')}</span>
     </label>
   </div>
 
   <div class="divider"></div>
 
-  <!-- ===== TRANSFER ===== -->
   <div class="sub-panel">
     <div style="display:flex;align-items:center;gap:6px">
-      <span class="sub-title" style="color:var(--purple-bright)">⤳ 特殊跳转（Transfer）</span>
+      <span class="sub-title" style="color:var(--purple-bright)">${T('transferTitle')}</span>
       <label class="checkbox-row" style="margin-left:auto;gap:4px">
         <input type="checkbox" ${n.isTransfer?'checked':''} onchange="patch('isTransfer',this.checked);renderInspector()">
-        <span style="font-size:11px">启用</span>
+        <span style="font-size:11px">${T('enableLabel')}</span>
       </label>
     </div>
     ${n.isTransfer?`
-    <div class="hint">生成 if/else_if/else 链。"默认/无条件"分支作为 else 兜底放最后。<br>
-    到达此 msgNum 时，系统会检查 special_transfers 数组并调用此函数。</div>
+    <div class="hint">${T('transferHint')}</div>
     <div id="tbrList">${buildTBrsHTML(n)}</div>
-    <button class="btn sm" style="margin-top:4px" onclick="addTBr()">＋ 添加条件分支</button>
-    `:`<div class="hint">启用后可为此节点配置多个条件→目标分支</div>`}
+    <button class="btn sm" style="margin-top:4px" onclick="addTBr()">${T('addBranchBtn')}</button>
+    `:`<div class="hint">${T('transferDisabledHint')}</div>`}
   </div>
 
   <div class="divider"></div>
 
-  <!-- ===== OPTIONS ===== -->
   <div class="sub-panel">
     <div style="display:flex;align-items:center;gap:6px">
-      <span class="sub-title" style="color:var(--green-bright)">▶ 玩家选项</span>
-      <button class="btn sm" style="margin-left:auto" onclick="addOpt()">＋ 添加</button>
+      <span class="sub-title" style="color:var(--green-bright)">${T('optionsTitle')}</span>
+      <button class="btn sm" style="margin-left:auto" onclick="addOpt()">${T('addBtn')}</button>
     </div>
-    <div class="hint">
-      <b>跳转#</b>：set_temp_variable last_value = N，留空则不设（配合"继续流"用）<br>
-      <b>继续流</b>：勾选后调用 SZR_chat_continue_effect 而非 set_temp_variable<br>
-      <b>效果脚本</b>：写 ROOT = { } 内部内容，导出时自动包裹ROOT块
-    </div>
+    <div class="hint">${T('optionsHint')}</div>
     <div id="optList">${buildOptsHTML(n)}</div>
   </div>`;
 }
 
 function buildPopsHTML(n){
-  if(!n.portraitOps.length)return'<div class="hint">暂无操作</div>';
+  if(!n.portraitOps.length)return`<div class="hint">${T('noOps')}</div>`;
   return n.portraitOps.map((op,i)=>`
     <div class="card">
       <div class="card-row">
-        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">操作${i+1}</span>
+        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">${T('opLabel')(i)}</span>
         <select style="flex:1" onchange="updPop(${i},'type',this.value);renderInspector()">
-          <option value="remove_first_add" ${op.type==='remove_first_add'?'selected':''}>🔄 删旧+加新角色</option>
-          <option value="add_first_empty" ${op.type==='add_first_empty'?'selected':''}>➕ 补空槽（add_first 9999）</option>
-          <option value="move_last" ${op.type==='move_last'?'selected':''}>↘ 移到末尾（move_last）</option>
-          <option value="clear" ${op.type==='clear'?'selected':''}>🗑 清空所有肖像</option>
+          <option value="remove_first_add" ${op.type==='remove_first_add'?'selected':''}>${T('opTypes').remove_first_add}</option>
+          <option value="add_first_empty" ${op.type==='add_first_empty'?'selected':''}>${T('opTypes').add_first_empty}</option>
+          <option value="move_last" ${op.type==='move_last'?'selected':''}>${T('opTypes').move_last}</option>
+          <option value="clear" ${op.type==='clear'?'selected':''}>${T('opTypes').clear}</option>
         </select>
         <button class="xbtn" onclick="delPop(${i})">✕</button>
       </div>
       ${(op.type==='remove_first_add'||op.type==='move_last')?`
       <div class="card-row">
-        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">目标角色：</span>
+        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">${T('targetCharLabel')}</span>
         <select style="flex:1" onchange="updPop(${i},'charId',this.value)">${charOpts(op.charId)}</select>
-      </div>`:''
-      }
+      </div>`:''}
     </div>`).join('');
 }
 
 function buildTBrsHTML(n){
-  if(!n.transferBranches.length)return'<div class="hint">暂无分支，点击下方添加</div>';
+  if(!n.transferBranches.length)return`<div class="hint">${T('noBranches')}</div>`;
   return n.transferBranches.map((b,i)=>`
     <div class="card">
       <div class="card-row">
-        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">分支${i+1}</span>
+        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">${T('branchLabel')(i)}</span>
         <select style="flex:1" onchange="updTBr(${i},'condType',this.value);renderInspector()">
-          <option value="none" ${b.condType==='none'?'selected':''}>默认（else兜底，无条件）</option>
-          <option value="check_variable" ${b.condType==='check_variable'?'selected':''}>check_variable</option>
-          <option value="has_country_flag" ${b.condType==='has_country_flag'?'selected':''}>has_country_flag</option>
-          <option value="is_in_array" ${b.condType==='is_in_array'?'selected':''}>is_in_array</option>
-          <option value="custom" ${b.condType==='custom'?'selected':''}>自定义（原始脚本）</option>
+          <option value="none" ${b.condType==='none'?'selected':''}>${T('condTypes').none}</option>
+          <option value="check_variable" ${b.condType==='check_variable'?'selected':''}>${T('condTypes').check_variable}</option>
+          <option value="has_country_flag" ${b.condType==='has_country_flag'?'selected':''}>${T('condTypes').has_country_flag}</option>
+          <option value="is_in_array" ${b.condType==='is_in_array'?'selected':''}>${T('condTypes').is_in_array}</option>
+          <option value="custom" ${b.condType==='custom'?'selected':''}>${T('condTypes').custom}</option>
         </select>
-        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">→ #</span>
+        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">${T('jumpLabel')}</span>
         <input type="number" style="width:58px" value="${b.toMsgNum||''}" placeholder="msg#"
           onchange="updTBr(${i},'toMsgNum',this.value)">
         <button class="xbtn" onclick="delTBr(${i})">✕</button>
       </div>
       ${b.condType==='check_variable'?`
       <div class="card-row">
-        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">变量</span>
-        <input style="flex:1;min-width:60px" value="${esc(b.varName||'')}" placeholder="如 ROOT.xxx"
+        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">${T('varLabel')}</span>
+        <input style="flex:1;min-width:60px" value="${esc(b.varName||'')}" placeholder="${T('varPh')}"
           onchange="updTBr(${i},'varName',this.value)">
-        <span style="font-size:9px;color:var(--text-dim)">＝</span>
-        <input style="width:65px" value="${esc(b.varValue||'')}" placeholder="值 / token:xx"
+        <span style="font-size:9px;color:var(--text-dim)">${T('eqLabel')}</span>
+        <input style="width:65px" value="${esc(b.varValue||'')}" placeholder="${T('valPh')}"
           onchange="updTBr(${i},'varValue',this.value)">
       </div>`:''
       }${b.condType==='has_country_flag'?`
       <div class="card-row">
-        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">国旗名</span>
-        <input style="flex:1" value="${esc(b.flagName||'')}" placeholder="flag_name"
+        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">${T('flagLabel')}</span>
+        <input style="flex:1" value="${esc(b.flagName||'')}" placeholder="${T('flagPh')}"
           onchange="updTBr(${i},'flagName',this.value)">
       </div>`:''
       }${b.condType==='is_in_array'?`
       <div class="card-row" style="flex-wrap:wrap">
-        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">数组</span>
-        <input style="flex:1;min-width:70px" value="${esc(b.arrayName||'')}" placeholder="ROOT.xxx_array"
+        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">${T('arrayLabel')}</span>
+        <input style="flex:1;min-width:70px" value="${esc(b.arrayName||'')}" placeholder="${T('arrayPh')}"
           onchange="updTBr(${i},'arrayName',this.value)">
-        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">含</span>
-        <input style="flex:1;min-width:70px" value="${esc(b.arrayValue||'')}" placeholder="token:xxx 或数字"
+        <span style="font-size:9px;color:var(--text-dim);white-space:nowrap">${T('containsLabel')}</span>
+        <input style="flex:1;min-width:70px" value="${esc(b.arrayValue||'')}" placeholder="${T('arrayValPh')}"
           onchange="updTBr(${i},'arrayValue',this.value)">
       </div>`:''
       }${b.condType==='custom'?`
       <div class="card-row">
-        <textarea rows="3" placeholder="limit块内的内容，如：\ncheck_variable = { last_value = 86 }\nhas_country_flag = xxx"
+        <textarea rows="3" placeholder="${T('customPh')}"
           onchange="updTBr(${i},'condScript',this.value)">${esc(b.condScript||'')}</textarea>
       </div>`:''
       }
@@ -631,26 +618,26 @@ function buildTBrsHTML(n){
 }
 
 function buildOptsHTML(n){
-  if(!n.options.length)return'<div class="hint">暂无选项</div>';
+  if(!n.options.length)return`<div class="hint">${T('noOptions')}</div>`;
   return n.options.map((o,i)=>`
     <div class="card">
       <div class="card-row">
-        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">编号</span>
+        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">${T('optNumLabel')}</span>
         <input type="number" style="width:52px" value="${o.optNum||''}" placeholder="optNum"
           onchange="updOpt(${i},'optNum',this.value)">
-        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">→ #</span>
+        <span style="font-size:10px;color:var(--text-dim);white-space:nowrap">${T('jumpLabel')}</span>
         <input type="number" style="width:58px" value="${o.toMsgNum||''}" placeholder="msg#"
           onchange="updOpt(${i},'toMsgNum',this.value)">
         <label style="display:flex;align-items:center;gap:3px;white-space:nowrap;font-size:10px;color:var(--blue-bright);margin-left:2px">
-          <input type="checkbox" ${o.useContinue?'checked':''} onchange="updOpt(${i},'useContinue',this.checked)">继续流
+          <input type="checkbox" ${o.useContinue?'checked':''} onchange="updOpt(${i},'useContinue',this.checked)">${T('continueLabel')}
         </label>
         <button class="xbtn" style="margin-left:auto" onclick="delOpt(${i})">✕</button>
       </div>
       <input style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text-bright);padding:4px 6px;border-radius:2px;font-size:11px;outline:none;font-family:'Noto Sans SC',sans-serif"
-        value="${esc(o.text||'')}" placeholder="选项文字..." onchange="updOpt(${i},'text',this.value)">
-      <span class="eff-label">HOI4 效果（ROOT = {} 内部内容，可留空）：</span>
+        value="${esc(o.text||'')}" placeholder="${T('optTextPh')}" onchange="updOpt(${i},'text',this.value)">
+      <span class="eff-label">${T('effLabel')}</span>
       <textarea class="opt-eff" rows="3"
-        placeholder="add_political_power = 25\nset_country_flag = some_flag\n..."
+        placeholder="${T('effPh')}"
         onchange="updOpt(${i},'effectScript',this.value)">${esc(o.effectScript||'')}</textarea>
     </div>`).join('');
 }
@@ -848,7 +835,7 @@ function genExport(st){
 function copyExp(){
   const eff=document.getElementById('effDiv').style.display!=='none';
   const t=eff?document.getElementById('effCode').textContent:document.getElementById('locCode').textContent;
-  navigator.clipboard.writeText(t).then(()=>alert('已复制'));
+  navigator.clipboard.writeText(t).then(()=>alert(T('copiedMsg')));
 }
 function dlExp(){
   const st=cs();
@@ -862,7 +849,7 @@ function dlExp(){
 
 // PREVIEW
 function showPreview(){
-  const st=cs();if(!st){alert('请先选择剧情');return;}
+  const st=cs();if(!st){alert(T('selectStoryFirst'));return;}
   const nodes=[...st.nodes].sort((a,b)=>a.msgNum-b.msgNum);
   let h=`<div style="font-family:'Noto Serif SC',serif;font-size:13px;color:var(--gold-dim);margin-bottom:12px">${st.displayName}</div>`;
   nodes.forEach(n=>{
@@ -872,12 +859,211 @@ function showPreview(){
     if(sp)h+=`<div class="preview-speaker" style="color:${sc}">${sp.name}</div>`;
     h+=`<div class="preview-content">${esc(n.text)||''}</div>`;
     if(n.options.length)n.options.forEach(o=>h+=`<div class="preview-opt">▶ [${o.optNum}] ${esc(o.text)||'...'}</div>`);
-    if(n.isEnd)h+=`<div style="font-size:10px;color:var(--red-bright);margin-top:4px">═══ 剧情结束 ═══</div>`;
-    if(n.isTransfer)h+=`<div style="font-size:10px;color:var(--purple-bright);margin-top:4px">⤳ 特殊跳转（${n.transferBranches.length}分支）</div>`;
+    if(n.isEnd)h+=`<div style="font-size:10px;color:var(--red-bright);margin-top:4px">${T('storyEndTag')}</div>`;
+    if(n.isTransfer)h+=`<div style="font-size:10px;color:var(--purple-bright);margin-top:4px">${T('transferTag')(n.transferBranches.length)}</div>`;
     h+=`</div>`;
   });
   document.getElementById('prevContent').innerHTML=h;
   document.getElementById('previewModal').classList.add('open');
+}
+
+
+// ================================================================
+// I18N
+// ================================================================
+const LANG = {
+  zh: {
+    logoSub: '剧情编辑器 v2',
+    autoLayout: '自动排版', preview: '预览', exportCode: '导出代码',
+    newStory: '＋ 新建', delStory: '删除',
+    secChars: '角色管理', hintCharId: 'ID从10000起自动分配', charNamePh: '角色名',
+    secStories: '剧情列表',
+    btnAddNode: '＋ 添加节点',
+    canvasHint: '拖动标题栏移动 · 点击节点体选中编辑',
+    emptyText: '选择或新建剧情，然后添加节点',
+    inspTitle: '属性编辑',
+    exportTitle: '导出 HOI4 脚本', closeBtn: '关闭',
+    locTab: '本地化 (.yml)',
+    copyBtn: '复制', dlBtn: '下载',
+    previewTitle: '对话预览',
+    selectStory: '— 选择剧情 —', none: '— 无 —',
+    // alerts & prompts
+    selectStoryFirst: '请先选择剧情',
+    storyNamePrompt: '剧情名称：',
+    tokenKeyPrompt: 'token key（字母_数字，如 kmd_c1）：',
+    confirmDelStory: (n)=>`删除「${n}」？`,
+    confirmDelChar: (n)=>`删除角色「${n}」？\n注意：已引用该角色的节点不会自动清空。`,
+    copiedMsg: '已复制',
+    // inspector labels
+    msgNumLabel: '消息编号 (msgNum)',
+    msgNumHint: '必须唯一；决定对话流程顺序',
+    speakerLabel: '说话人',
+    nameMarkLabel: 'NAME标记（此节点触发角色名显示）',
+    nameMarkHint: '勾选=在 name_setup/names_get 中注册此 msgNum',
+    dialogueLabel: '台词内容', dialoguePh: '建议不超过38字',
+    portraitTitle: '🖼 肖像操作', addBtn: '＋ 添加',
+    portraitHint: `<b style="color:var(--blue-bright)">删旧+加新</b> = remove_first + add 新角色到末尾<br>
+      <b style="color:var(--gold)">补空槽</b> = add_first 9999（填补被删的槽位）<br>
+      <b style="color:var(--green-bright)">移到末尾</b> = move_last（将指定角色置于高亮末位）<br>
+      <b style="color:var(--red-bright)">清空全部</b> = clear_array portraits_local`,
+    portraitSongLabel: '肖像触发时附加音乐（可空）', portraitSongPh: '曲名字符串',
+    endLabel: '结束节点（END_msgs）',
+    transferTitle: '⤳ 特殊跳转（Transfer）', enableLabel: '启用',
+    transferHint: '生成 if/else_if/else 链。"默认/无条件"分支作为 else 兜底放最后。<br>到达此 msgNum 时，系统会检查 special_transfers 数组并调用此函数。',
+    transferDisabledHint: '启用后可为此节点配置多个条件→目标分支',
+    addBranchBtn: '＋ 添加条件分支',
+    optionsTitle: '▶ 玩家选项',
+    optionsHint: `<b>跳转#</b>：set_temp_variable last_value = N，留空则不设（配合"继续流"用）<br>
+      <b>继续流</b>：勾选后调用 SZR_chat_continue_effect 而非 set_temp_variable<br>
+      <b>效果脚本</b>：写 ROOT = { } 内部内容，导出时自动包裹ROOT块`,
+    noNode: '请选择一个节点',
+    noOps: '暂无操作', noBranches: '暂无分支，点击下方添加', noOptions: '暂无选项',
+    opLabel: (i)=>`操作${i+1}`,
+    branchLabel: (i)=>`分支${i+1}`,
+    optNumLabel: '编号', jumpLabel: '→ #', continueLabel: '继续流',
+    optTextPh: '选项文字...',
+    effLabel: 'HOI4 效果（ROOT = {} 内部内容，可留空）：',
+    effPh: 'add_political_power = 25\nset_country_flag = some_flag\n...',
+    opTypes: {
+      remove_first_add: '🔄 删旧+加新角色',
+      add_first_empty: '➕ 补空槽（add_first 9999）',
+      move_last: '↘ 移到末尾（move_last）',
+      clear: '🗑 清空所有肖像',
+    },
+    condTypes: {
+      none: '默认（else兜底，无条件）',
+      check_variable: 'check_variable',
+      has_country_flag: 'has_country_flag',
+      is_in_array: 'is_in_array',
+      custom: '自定义（原始脚本）',
+    },
+    varLabel: '变量', varPh: '如 ROOT.xxx', eqLabel: '＝', valPh: '值 / token:xx',
+    flagLabel: '国旗名', flagPh: 'flag_name',
+    arrayLabel: '数组', arrayPh: 'ROOT.xxx_array', containsLabel: '含', arrayValPh: 'token:xxx 或数字',
+    customPh: 'limit块内的内容，如：\ncheck_variable = { last_value = 86 }\nhas_country_flag = xxx',
+    targetCharLabel: '目标角色：',
+    noStories: '暂无剧情', nodeCount: (n)=>`${n} 节点`,
+    nodeNarrator: '旁白', nodeEmpty: '（空台词）',
+    nodeEdit: '编辑', nodeDelete: '删除',
+    branchDefault: '默认', branchCond: '条件',
+    storyEndTag: '═══ 剧情结束 ═══',
+    transferTag: (n)=>`⤳ 特殊跳转（${n}分支）`,
+    delCharTitle: '删除角色',
+  },
+  en: {
+    logoSub: 'Story Editor v2',
+    autoLayout: 'Auto Layout', preview: 'Preview', exportCode: 'Export',
+    newStory: '＋ New', delStory: 'Delete',
+    secChars: 'Characters', hintCharId: 'IDs assigned from 10000', charNamePh: 'Name',
+    secStories: 'Stories',
+    btnAddNode: '＋ Add Node',
+    canvasHint: 'Drag header to move · Click body to edit',
+    emptyText: 'Select or create a story, then add nodes',
+    inspTitle: 'Properties',
+    exportTitle: 'Export HOI4 Script', closeBtn: 'Close',
+    locTab: 'Localisation (.yml)',
+    copyBtn: 'Copy', dlBtn: 'Download',
+    previewTitle: 'Dialogue Preview',
+    selectStory: '— Select Story —', none: '— None —',
+    selectStoryFirst: 'Please select a story first',
+    storyNamePrompt: 'Story name:',
+    tokenKeyPrompt: 'Token key (letters/numbers/_, e.g. kmd_c1):',
+    confirmDelStory: (n)=>`Delete story "${n}"?`,
+    confirmDelChar: (n)=>`Delete character "${n}"?\nNote: nodes referencing this character will NOT be updated automatically.`,
+    copiedMsg: 'Copied!',
+    msgNumLabel: 'Message Number (msgNum)',
+    msgNumHint: 'Must be unique; determines dialogue flow order',
+    speakerLabel: 'Speaker',
+    nameMarkLabel: 'NAME flag (insert speaker name header at this node)',
+    nameMarkHint: 'Checked = register this msgNum in name_setup/names_get',
+    dialogueLabel: 'Dialogue Text', dialoguePh: 'Recommended max ~38 Chinese chars',
+    portraitTitle: '🖼 Portrait Ops', addBtn: '＋ Add',
+    portraitHint: `<b style="color:var(--blue-bright)">Replace</b> = remove_first + add new char<br>
+      <b style="color:var(--gold)">Fill empty slot</b> = add_first 9999 (placeholder)<br>
+      <b style="color:var(--green-bright)">Move to end</b> = move_last (highlight)<br>
+      <b style="color:var(--red-bright)">Clear all</b> = clear_array portraits_local`,
+    portraitSongLabel: 'Song on portrait trigger (optional)', portraitSongPh: 'Song name string',
+    endLabel: 'End node (END_msgs)',
+    transferTitle: '⤳ Special Transfer', enableLabel: 'Enable',
+    transferHint: 'Generates if/else_if/else chain. "Default/none" branch becomes the else fallback.<br>When this msgNum is reached, the system checks special_transfers and calls this function.',
+    transferDisabledHint: 'Enable to configure conditional jump branches for this node',
+    addBranchBtn: '＋ Add Branch',
+    optionsTitle: '▶ Player Options',
+    optionsHint: `<b>Jump #</b>: set_temp_variable last_value = N (leave blank for continue-flow)<br>
+      <b>Continue flow</b>: calls SZR_chat_continue_effect instead of set_temp_variable<br>
+      <b>Effect script</b>: write inside ROOT = { }, auto-wrapped on export`,
+    noNode: 'Select a node to edit',
+    noOps: 'No operations', noBranches: 'No branches — click below to add', noOptions: 'No options',
+    opLabel: (i)=>`Op ${i+1}`,
+    branchLabel: (i)=>`Branch ${i+1}`,
+    optNumLabel: 'ID', jumpLabel: '→ #', continueLabel: 'Continue',
+    optTextPh: 'Option text...',
+    effLabel: 'HOI4 Effect (contents of ROOT = { }, can be blank):',
+    effPh: 'add_political_power = 25\nset_country_flag = some_flag\n...',
+    opTypes: {
+      remove_first_add: '🔄 Replace (remove + add new)',
+      add_first_empty: '➕ Fill slot (add_first 9999)',
+      move_last: '↘ Move to end (move_last)',
+      clear: '🗑 Clear all portraits',
+    },
+    condTypes: {
+      none: 'Default (else fallback, no condition)',
+      check_variable: 'check_variable',
+      has_country_flag: 'has_country_flag',
+      is_in_array: 'is_in_array',
+      custom: 'Custom (raw script)',
+    },
+    varLabel: 'Variable', varPh: 'e.g. ROOT.xxx', eqLabel: '=', valPh: 'value / token:xx',
+    flagLabel: 'Flag name', flagPh: 'flag_name',
+    arrayLabel: 'Array', arrayPh: 'ROOT.xxx_array', containsLabel: 'contains', arrayValPh: 'token:xxx or number',
+    customPh: 'Contents of limit block, e.g.:\ncheck_variable = { last_value = 86 }\nhas_country_flag = xxx',
+    targetCharLabel: 'Target character:',
+    noStories: 'No stories', nodeCount: (n)=>`${n} node${n===1?'':'s'}`,
+    nodeNarrator: 'Narrator', nodeEmpty: '(empty)',
+    nodeEdit: 'Edit', nodeDelete: 'Delete',
+    branchDefault: 'Default', branchCond: 'Cond',
+    storyEndTag: '═══ End of Story ═══',
+    transferTag: (n)=>`⤳ Special Transfer (${n} branch${n===1?'':'es'})`,
+    delCharTitle: 'Delete character',
+  }
+};
+
+let lang = 'zh';
+function T(key){ return LANG[lang][key] ?? key; }
+
+function toggleLang(){
+  lang = lang==='zh' ? 'en' : 'zh';
+  document.getElementById('langBtn').textContent = lang==='zh' ? 'EN' : '中';
+  applyI18n();
+  // Re-render all dynamic content
+  renderChars(); renderStories(); renderStorySel();
+  renderCanvas(); renderInspector();
+}
+
+function applyI18n(){
+  const L = LANG[lang];
+  document.getElementById('logoSub').textContent = L.logoSub;
+  document.getElementById('btnAutoLayout').textContent = L.autoLayout;
+  document.getElementById('btnPreview').textContent = L.preview;
+  document.getElementById('btnExport').textContent = L.exportCode;
+  document.getElementById('btnNewStory').textContent = L.newStory;
+  document.getElementById('btnDelStory').textContent = L.delStory;
+  document.getElementById('secChars').textContent = L.secChars;
+  document.getElementById('hintCharId').textContent = L.hintCharId;
+  document.getElementById('newCharName').placeholder = L.charNamePh;
+  document.getElementById('secStories').textContent = L.secStories;
+  document.getElementById('btnAddNode').textContent = L.btnAddNode;
+  document.getElementById('canvasHint').textContent = L.canvasHint;
+  document.getElementById('emptyText').textContent = L.emptyText;
+  document.getElementById('inspTitle').textContent = L.inspTitle;
+  document.getElementById('exportTitle').textContent = L.exportTitle;
+  document.getElementById('btnCloseExport').textContent = L.closeBtn;
+  document.getElementById('et2').textContent = L.locTab;
+  document.getElementById('btnCopy').textContent = L.copyBtn;
+  document.getElementById('btnDl').textContent = L.dlBtn;
+  document.getElementById('previewTitle').textContent = L.previewTitle;
+  document.getElementById('btnClosePreview').textContent = L.closeBtn;
+  document.getElementById('lblStory').textContent = lang==='zh'?'剧情：':'Story:';
 }
 
 init();
